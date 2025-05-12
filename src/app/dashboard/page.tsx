@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback, FormEvent } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -34,6 +35,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../components/ui/popover";
+import { cardHoverEffect, subtleButtonHover, staggerContainer, fadeInUp } from '../../lib/animations';
 
 // Define Types
 interface Project {
@@ -330,9 +332,13 @@ export default function DashboardPage() {
          <div className="flex space-x-4">
              <Dialog open={isNewProjectModalOpen} onOpenChange={setIsNewProjectModalOpen}>
                 <DialogTrigger asChild>
+                  <motion.div
+                    whileHover={subtleButtonHover.whileHover}
+                  >
                     <Button>
                         <PlusCircle className="mr-2 h-4 w-4" /> New Project
                     </Button>
+                  </motion.div>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <form onSubmit={handleCreateProject}>
@@ -375,10 +381,14 @@ export default function DashboardPage() {
 
              <Dialog open={isNewTaskModalOpen} onOpenChange={setIsNewTaskModalOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="secondary">
+                  <motion.div
+                    whileHover={subtleButtonHover.whileHover}
+                  >
+                    <Button>
                         <PlusCircle className="mr-2 h-4 w-4" /> New Task
                     </Button>
-                 </DialogTrigger>
+                   </motion.div>
+                </DialogTrigger>
                  <DialogContent className="sm:max-w-[425px]">
                     <form onSubmit={handleCreateTask}>
                         <DialogHeader>
@@ -434,19 +444,29 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-             {filteredAndSortedProjects.length > 0 ? (
+             {isLoadingData ? (
+                 <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading projects...
+                 </div>
+             ) : fetchError ? (
+                 <p className="text-red-600 dark:text-red-500">{fetchError}</p>
+             ) : filteredAndSortedProjects.length > 0 ? (
                  <ul className="space-y-2">
                     {filteredAndSortedProjects.map((project) => (
-                        <li key={project.id} className="flex justify-between items-center p-2 border-b last:border-b-0 hover:bg-accent">
-                            <Link href={`/dashboard/projects/${project.id}`} className="flex-grow hover:underline">
+                        <motion.li
+                            key={project.id}
+                            className="flex justify-between items-center p-2 border-b last:border-b-0 hover:bg-accent"
+                            whileHover={cardHoverEffect.whileHover}
+                        >
+                            <Link href={`/dashboard/projects/${project.id}`} className="flex-grow hover:underline mr-2 truncate">
                                 <span>{project.name}</span>
                             </Link>
-                            <span className={`text-sm font-medium px-2 py-0.5 rounded-full ml-2 ${
+                            <span className={`flex-shrink-0 text-xs sm:text-sm font-medium px-2 py-0.5 rounded-full ml-auto whitespace-nowrap ${
                                 project.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
                                 project.status === 'Planning' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
                                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                             }`}>{project.status}</span>
-                        </li>
+                        </motion.li>
                     ))}
                  </ul>
              ) : (
@@ -466,15 +486,30 @@ export default function DashboardPage() {
              </div>
            </CardHeader>
            <CardContent>
-             {filteredTasks.length > 0 ? (
-                 <ul className="space-y-2">
+             {isLoadingData ? (
+                 <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading tasks...
+                 </div>
+             ) : fetchError ? (
+                 <p className="text-red-600 dark:text-red-500">{fetchError}</p>
+             ) : filteredTasks.length > 0 ? (
+                 <motion.ul
+                    className="space-y-2"
+                    variants={staggerContainer()}
+                    initial="initial"
+                    animate="animate"
+                 >
                     {filteredTasks.map((task) => (
-                         <li key={task.id} className="flex justify-between items-center p-2 border-b last:border-b-0">
+                         <motion.li
+                             key={task.id}
+                             className="flex justify-between items-center p-2 border-b last:border-b-0"
+                             variants={fadeInUp}
+                         >
                              <span>{task.description}</span>
                              <span className="text-sm text-gray-500 dark:text-gray-400">{task.dueDate}</span>
-                         </li>
+                         </motion.li>
                      ))}
-                  </ul>
+                  </motion.ul>
               ) : (
                   <p className="text-gray-500 dark:text-gray-400">No tasks match your filter/search.</p>
               )}
@@ -486,15 +521,30 @@ export default function DashboardPage() {
             <CardTitle className="flex items-center"><Activity className="mr-2 h-5 w-5" /> Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-             {activity.length > 0 ? (
-                 <ul className="space-y-3">
+             {isLoadingData ? (
+                <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading activity...
+                 </div>
+             ) : fetchError ? (
+                 <p className="text-red-600 dark:text-red-500">{fetchError}</p>
+             ) : activity.length > 0 ? (
+                 <motion.ul
+                    className="space-y-3"
+                    variants={staggerContainer(0.08)}
+                    initial="initial"
+                    animate="animate"
+                 >
                     {activity.map((activityItem) => (
-                        <li key={activityItem.id} className="text-sm">
+                        <motion.li
+                            key={activityItem.id}
+                            className="text-sm"
+                            variants={fadeInUp}
+                        >
                             <span className="font-medium">{activityItem.user}</span> {activityItem.action} '{activityItem.target}'.
                             <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">{activityItem.time}</span>
-                        </li>
+                        </motion.li>
                     ))}
-                 </ul>
+                 </motion.ul>
              ) : (
                  <p className="text-gray-500 dark:text-gray-400">No recent activity.</p>
              )}

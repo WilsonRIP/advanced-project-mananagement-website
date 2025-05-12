@@ -4,6 +4,7 @@ import './styles/global.css';
 import Navbar from './components/ui/Navbar';
 import Footer from './components/ui/Footer';
 import { ThemeProvider } from './components/providers/theme-provider';
+import PageTransitionWrapper from './components/PageTransitionWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,9 +28,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <main className="min-h-screen pt-16">
+          <PageTransitionWrapper>
             {children}
-          </main>
+          </PageTransitionWrapper>
           <Footer />
         </ThemeProvider>
       </body>
